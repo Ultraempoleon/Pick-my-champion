@@ -19,26 +19,25 @@ random.seed()
 #line only
 def serperate_into_words(line, champions_list):
     word = ""
-    i = 0
     for l in line:
-        print("current letter: {}".format(i))
         if (l != ' '):
             word += l
         else:
             champions_list.append(word)
             word = ""
 
+
 #if the 3rd line is empty create the list of available champions
+#when its empty it will generate the next level of champions
 def generate_list(level, level_list, champion_list):
     i = 0
     while i < level:
         level_list.append(champion_list[i])
-        i +=1
+        i += 1
 
 
 #adds list into a string that can be written onto file
 def concat_list_into_word(champ_list):
-    i = 0
     word = ""
     for c in champ_list:
         word += c
@@ -48,53 +47,60 @@ def concat_list_into_word(champ_list):
 
 
 def select_champion(champ_list):
-    list_size = len(champ_list)
+    #picks a random number from 0 - #of champs in list
+    number = random.randrange(0,len(champ_list))
 
 
 def main():
-    champions = []
-    current_level_champions = []
-    file = open("champs.txt")
-    content = file.readlines()
+    champions = [] #all the champions on the list
+    current_level_champions = [] #champions at that level
+    file = open("champs.txt") #opens file
+    content = file.readlines() #seperates lines so that each line can be read individually
 
     serperate_into_words(content[0], champions)
 
-    for c in champions:
-        print(c)
-
-    print("\n")
-
-    print(content[2])
-
     try:
-        level = int(content[1])
+        level = int(content[1]) #level will determine how many champions will be in a pool
     except IndexError:
         print("there is no line 2")
 
+    #checks if the third line exists
     try:
+        #if it does exists, adds that list of champions into the list
         if (content[2] != "\n"):
             serperate_into_words(content[2], current_level_champions) #put the champions on the second list
+        
+        #if there is not a list (the assumption is that the previous level was finished)
+        #it will create a new pool adding one more champion to it (i.e. the next level)
         else:
+            #if the level would exceed the maximum number of champions
+            #level is set to 0; else level is raised by 1
+            if (level+1) > len(champions):
+                level = 0
+            else:
+                level += 1
+
             generate_list(level, current_level_champions, champions)
             champion_list_string = concat_list_into_word(current_level_champions)
             content[2] = champion_list_string
+            content[1] = str(level)
 
     except IndexError:
         print("\nUhhh there is no line 3, write something on that line or indent on it")
     
-    print(current_level_champions)
-    # print("Champions to pick from")
-    # for champs in current_level_champions:
-    #     print(champs)
+    print("Champions to pick from")
+    for champs in current_level_champions:
+        print(champs, end=" ")
     
     
-    #champion_selected = select_champion(current_level_champions)
+    champion_selected = select_champion(current_level_champions)
 
 
     with open("champs.txt", 'w') as file2:
-        file2.writelines( content )    
+        file2.writelines( content )
 
-        
+
+
   
 # Using the special variable 
 # __name__
