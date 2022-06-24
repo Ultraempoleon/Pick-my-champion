@@ -117,8 +117,10 @@ def main():
 
         generate_list(level, current_level_champions, champions)
         champion_list_string = concat_list_into_word(current_level_champions)
-        file.write("")
-        content = file.readlines()
+        with open("champs.txt", "w") as file3:
+            file3.writelines( content )
+            file3.writelines("\n" + champion_list_string)
+        
         content[2] = champion_list_string
         content[1] = str(level)
         
