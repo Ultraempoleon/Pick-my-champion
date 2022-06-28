@@ -47,8 +47,27 @@ def concat_list_into_word(champ_list):
 
 
 def select_champion(champ_list):
+    list_size = len(champ_list)
     #picks a random number from 0 - #of champs in list
     number = random.randrange(0,len(champ_list))
+    if (list_size-1 == 0):
+        champ = champ_list[0]
+        champ_list.pop(0)
+        return champ
+
+
+    number = random.randrange(0,list_size-1)
+    i = 0
+    champ = ""
+
+    while (i<list_size):
+        if i == number:
+            champ = champ_list[i]
+            champ_list.pop(i)
+            return champ
+        i += 1
+
+    return "Error occurred, no champion slected"
 
 
 def main():
@@ -69,10 +88,11 @@ def main():
         #if it does exists, adds that list of champions into the list
         if (content[2] != "\n"):
             serperate_into_words(content[2], current_level_champions) #put the champions on the second list
-        
+
         #if there is not a list (the assumption is that the previous level was finished)
         #it will create a new pool adding one more champion to it (i.e. the next level)
         else:
+            print("\nbutts")
             #if the level would exceed the maximum number of champions
             #level is set to 0; else level is raised by 1
             if (level+1) > len(champions):
@@ -87,13 +107,30 @@ def main():
 
     except IndexError:
         print("\nUhhh there is no line 3, write something on that line or indent on it")
-    
+        
+        if (level+1) > len(champions):
+            level = 0
+        else:
+            level += 1
+        generate_list(level, current_level_champions, champions)
+        champion_list_string = concat_list_into_word(current_level_champions)
+        
+        content[2] = champion_list_string
+        content[1] = str(level)
+
     print("Champions to pick from")
     for champs in current_level_champions:
         print(champs, end=" ")
     
     
     champion_selected = select_champion(current_level_champions)
+    print("\nChampion Selected: {}\n".format(champion_selected))
+    if (len(current_level_champions) == 0):
+        print("\nButt")
+        content[2] = "\n"
+    else:
+        champion_list_string = concat_list_into_word(current_level_champions)
+        content[2] = champion_list_string
 
 
     with open("champs.txt", 'w') as file2:
