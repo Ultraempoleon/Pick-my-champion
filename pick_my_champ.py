@@ -108,7 +108,7 @@ def main():
     #repeat of the else statement the exact same code twice, why not create a call function?
     #it might overcomplicate things? I'll try it later
     except IndexError:
-        print("\nUhhh there is no line 3, write something on that line or indent on it")
+        print("\nUhhh there is no line 3")
         
         if (level+1) > len(champions):
             level = 0
@@ -121,11 +121,13 @@ def main():
             file3.writelines( content )
             file3.writelines("\n" + champion_list_string)
         
+        file = open("champs.txt") #opens file
+        content = file.readlines()
         content[2] = champion_list_string
         content[1] = str(level)
         
 
-    
+
     
     print("Champions to pick from")
     for champs in current_level_champions:
@@ -136,6 +138,7 @@ def main():
     champion_selected = select_champion(current_level_champions)
     print("Champion Selected: {}\n".format(champion_selected))
     champion_list_string = concat_list_into_word(current_level_champions)
+    print("champion list {}".format(champion_list_string))
     content[2] = champion_list_string
 
     with open("champs.txt", 'w') as file2:
