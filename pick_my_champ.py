@@ -17,7 +17,7 @@ random.seed()
 #python is doing dumb things when I try to read by the lines so I created
 #this short algorithm to seperate the words into an array from the first
 #line only
-def serperate_into_words(line, champions_list):
+def seperate_into_words(line, champions_list):
     word = ""
     for l in line:
         if (l != ' '):
@@ -29,11 +29,17 @@ def serperate_into_words(line, champions_list):
 
 #if the 3rd line is empty create the list of available champions
 #when its empty it will generate the next level of champions
-def generate_list(level, level_list, champion_list):
+def generate_list(level, current_level_champions, champions):
+
+    #This function assumes that the the level is being incremented
+    level += 1
+    current_level_champions[0] = str(level)
+
     i = 0
     while i < level:
-        level_list.append(champion_list[i])
+        current_level_champions.append(champions[i])
         i += 1
+    current_level_champions.append("Fiddlesticks")
 
 
 #adds list into a string that can be written onto file
@@ -46,28 +52,43 @@ def concat_list_into_word(champ_list):
     return word
 
 
+#this function selects a champion from
 def select_champion(champ_list):
     list_size = len(champ_list)
-    #picks a random number from 0 - #of champs in list
-    if (list_size-1 == 0):
-        champ = champ_list[0]
-        champ_list.pop(0)
+
+    #if there is only one champion in the list it just pops it
+    if (list_size-1 == 1):
+        champ = champ_list[1]
+        champ_list.pop(1)
         return champ
+    
+    #picks a random number from 1 - #of champs in list
+    number = random.randrange(1,len(champ_list))
+
+    #Has an indent because of a while loop with end= " "
+    print("\nChamp Selected: {}".format(champ_list[number]))
+    print("Was this champion selected? Y/N", end=" ")
+    confirm = input()
+
+    #sometimes the champion could not be selected
+    while(confirm == 'N' or confirm == 'n'):
+        number = random.randrange(1,len(champ_list))
+        print("\nChampion Selected: {}".format(champ_list[number]))
+        print("Was this champion selected? Y/N", end=" ")
+        confirm = input()
 
 
-    number = random.randrange(0,list_size-1)
-    i = 0
-    champ = ""
+    champ = champ_list[number]
+    champ_list.pop(number)
+    return champ
 
-    while (i<list_size):
-        if i == number:
-            champ = champ_list[i]
-            champ_list.pop(i)
-            return champ
+
+#prints the list of champions ignoring the first element
+def print_champ_list(current_level_champions):
+    i = 1
+    while (i < len(current_level_champions)):
+        print("{} ".format(current_level_champions[i]), end=" ")
         i += 1
-
-    return "Error occurred, no champion slected"
-
 
 
 def main():
@@ -76,76 +97,47 @@ def main():
     file = open("champs.txt") #opens file
     content = file.readlines() #seperates lines so that each line can be read individually
 
-    serperate_into_words(content[0], champions)
-
-
+    #Seperates the first line into a list called champions
     try:
-        level = int(content[1]) #level will determine how many champions will be in a pool
+        seperate_into_words(content[0], champions)
     except IndexError:
-        print("there is no line 2")
+        print("You're missing the first line, the list of champions")
+        exit()
 
-    #checks if the third line exists
+
     try:
-        #if it does exists, adds that list of champions into the list
-        if (content[2] != "\n"):
-            serperate_into_words(content[2], current_level_champions) #put the champions on the second list
+        #so now the first element of current level champions has the level
+        seperate_into_words(content[1], current_level_champions)
+        level = int(current_level_champions[0]) #grabs first element as int
         
-        #if there is not a list (the assumption is that the previous level was finished)
-        #it will create a new pool adding one more champion to it (i.e. the next level)
-        else:
-            #if the level would exceed the maximum number of champions
-            #level is set to 0; else level is raised by 1
-            if (level+1) > len(champions):
-                level = 0
-            else:
-                level += 1
-
+        #create the list if the list is empty
+        if (len(current_level_champions) < 2):
             generate_list(level, current_level_champions, champions)
-            champion_list_string = concat_list_into_word(current_level_champions)
-            content[2] = champion_list_string
-            content[1] = str(level)
+
+        #prints the list of available champions
+        print("Champions to pick from: ", end=" ")
+        print_champ_list(current_level_champions)
+
+        #selects the champion
+        #champ selected isn't being used, too lazy too change it
+        champ_selected = select_champion(current_level_champions)
+        #print("Champion Selected: {}".format(champ_selected))
+
+        #turns the list into a string that can be written back onto the file
+        champion_list_string = concat_list_into_word(current_level_champions)
+        content[1] = champion_list_string
+
+        #writes the lines back onto the file
+        with open("champs.txt", 'w') as file2:
+            file2.writelines(content)
+
 
     #repeat of the else statement the exact same code twice, why not create a call function?
     #it might overcomplicate things? I'll try it later
     except IndexError:
-        print("\nUhhh there is no line 3")
-        
-        if (level+1) > len(champions):
-            level = 0
-        else:
-            level += 1
 
-        generate_list(level, current_level_champions, champions)
-        champion_list_string = concat_list_into_word(current_level_champions)
-        with open("champs.txt", "w") as file3:
-            file3.writelines( content )
-            file3.writelines("\n" + champion_list_string)
-        
-        file = open("champs.txt") #opens file
-        content = file.readlines()
-        content[2] = champion_list_string
-        content[1] = str(level)
-        
-
-
-    
-    print("Champions to pick from")
-    for champs in current_level_champions:
-        print(champs, end=" ")
-    print("\n")
-    print(len(current_level_champions))
-
-    champion_selected = select_champion(current_level_champions)
-    print("Champion Selected: {}\n".format(champion_selected))
-    champion_list_string = concat_list_into_word(current_level_champions)
-    print("champion list {}".format(champion_list_string))
-    content[2] = champion_list_string
-
-    with open("champs.txt", 'w') as file2:
-        file2.writelines( content )
-
-
-
+        print("You're missing the second line of the file")
+        exit()
   
 # Using the special variable 
 # __name__
